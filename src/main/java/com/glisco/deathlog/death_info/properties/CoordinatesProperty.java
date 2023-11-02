@@ -21,7 +21,7 @@ public class CoordinatesProperty implements DeathInfoProperty {
 
     @Override
     public Text formatted() {
-        return Text.translatable("deathlog.deathinfoproperty.coordinates.value", coordinates.getX(), coordinates.getY(), coordinates.getZ());
+        return Text.literal("%d %d %d".formatted(coordinates.getX(), coordinates.getY(), coordinates.getZ()));
     }
 
     @Override

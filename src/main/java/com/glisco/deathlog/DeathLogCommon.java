@@ -3,7 +3,6 @@ package com.glisco.deathlog;
 import com.glisco.deathlog.death_info.DeathInfoPropertySerializer;
 import com.glisco.deathlog.death_info.SpecialPropertyProvider;
 import com.glisco.deathlog.death_info.properties.TrinketComponentProperty;
-import com.glisco.deathlog.network.DeathLogPackets;
 import com.glisco.deathlog.storage.DeathLogStorage;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -22,7 +21,6 @@ public class DeathLogCommon implements ModInitializer {
 
         usePermissions = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
 
-        DeathLogPackets.Server.registerCommonListeners();
     }
 
     public static boolean usePermissions() {

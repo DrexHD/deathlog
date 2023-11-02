@@ -2,7 +2,7 @@ package com.glisco.deathlog.server;
 
 import com.glisco.deathlog.DeathLogCommon;
 import com.glisco.deathlog.client.DeathInfo;
-import com.glisco.deathlog.network.DeathLogPackets;
+import com.glisco.deathlog.server.gui.DeathGui;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -46,26 +46,41 @@ public class DeathLogServer implements DedicatedServerModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(literal("deathlog").then(literal("list").requires(hasPermission("deathlog.list"))
-                            .then(createProfileArgument().executes(context -> executeList(context, null))
-                                    .then(argument("search_term", StringArgumentType.string())
-                                            .executes(context -> executeList(context, StringArgumentType.getString(context, "search_term"))))))
-                    .then(literal("view").requires(hasPermission("deathlog.view")).then(createProfileArgument().executes(context -> {
-                        DeathLogPackets.Server.openScreen(getProfile(context).getId(), context.getSource().getPlayer());
-                        return 0;
-                    }))).then(literal("restore").requires(hasPermission("deathlog.restore")).then(createProfileArgument().then(argument("index", IntegerArgumentType.integer()).executes(context -> {
-                        int index = IntegerArgumentType.getInteger(context, "index");
-                        return executeRestore(context, index);
-                    })).then(literal("latest").executes(DeathLogServer::executeRestoreLatest)))));
+                    .then(createProfileArgument().executes(context -> executeList(context, null))
+                        .then(argument("search_term", StringArgumentType.string())
+                            .executes(context -> executeList(context, StringArgumentType.getString(context, "search_term"))))))
+                .then(literal("view").requires(hasPermission("deathlog.view")).then(createProfileArgument()
+                    .then(
+                        argument("index", IntegerArgumentType.integer(0)).executes(context -> executeView(context, deathInfos -> IntegerArgumentType.getInteger(context, "index"), INVALID_INDEX::create))
+                    ).then(
+                        literal("latest").executes(context -> executeView(context, deathInfos -> deathInfos.size() - 1, index -> NO_DEATHS.create()))
+                    )
+                )).then(literal("restore").requires(hasPermission("deathlog.restore")).then(createProfileArgument().then(argument("index", IntegerArgumentType.integer()).executes(context -> {
+                    int index = IntegerArgumentType.getInteger(context, "index");
+                    return executeRestore(context, index);
+                })).then(literal("latest").executes(DeathLogServer::executeRestoreLatest)))));
         });
 
-        DeathLogPackets.Server.registerDedicatedListeners();
+    }
+
+    private int executeView(CommandContext<ServerCommandSource> context, Function<List<DeathInfo>, Integer> indexProvider, Function<Integer, CommandSyntaxException> exceptionProvider) throws CommandSyntaxException {
+        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+        GameProfile profile = getProfile(context);
+        List<DeathInfo> deathInfoList = storage.getDeathInfoList(profile.getId());
+        final int index = indexProvider.apply(deathInfoList);
+        if (deathInfoList.isEmpty() || index > deathInfoList.size() - 1) throw exceptionProvider.apply(index);
+
+        DeathGui gui = new DeathGui(player, storage, profile, index);
+        gui.open();
+        return 1;
     }
 
     private int executeList(CommandContext<ServerCommandSource> context, @Nullable String filter) throws CommandSyntaxException {
         var profile = getProfile(context);
 
         var deathInfoList = DeathLogServer.getStorage().getDeathInfoList(profile.getId());
-        if (filter != null) deathInfoList = deathInfoList.stream().filter(info -> info.createSearchString().contains(filter.toLowerCase())).toList();
+        if (filter != null)
+            deathInfoList = deathInfoList.stream().filter(info -> info.createSearchString().contains(filter.toLowerCase())).toList();
 
         final var infoListSize = deathInfoList.size();
         for (int i = 0; i < infoListSize; i++) {
