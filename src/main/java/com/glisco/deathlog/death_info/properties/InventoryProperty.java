@@ -3,13 +3,19 @@ package com.glisco.deathlog.death_info.properties;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
+
+import java.util.Optional;
 
 public class InventoryProperty implements RestorableDeathInfoProperty {
 
@@ -44,11 +50,11 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
     @Override
     public void writeNbt(NbtCompound nbt) {
         final NbtList armorNbt = new NbtList();
-        playerArmor.forEach(stack -> armorNbt.add(stack.writeNbt(new NbtCompound())));
+        playerArmor.forEach(stack -> armorNbt.add(stack.encode(DynamicRegistryManager.EMPTY)));
         nbt.put("Armor", armorNbt);
 
         final NbtList inventoryNbt = new NbtList();
-        playerItems.forEach(stack -> inventoryNbt.add(stack.writeNbt(new NbtCompound())));
+        playerItems.forEach(stack -> inventoryNbt.add(stack.encode(DynamicRegistryManager.EMPTY)));
         nbt.put("Items", inventoryNbt);
     }
 
@@ -108,16 +114,20 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
             final NbtList armorNbt = nbt.getList("Armor", NbtElement.COMPOUND_TYPE);
             final var armorList = DefaultedList.ofSize(4, ItemStack.EMPTY);
             for (int i = 0; i < armorNbt.size(); i++) {
-                armorList.set(i, ItemStack.fromNbt(armorNbt.getCompound(i)));
+                armorList.set(i, fromNbt(armorNbt.getCompound(i)));
             }
 
             final NbtList itemNbt = nbt.getList("Items", NbtElement.COMPOUND_TYPE);
             final var itemList = DefaultedList.ofSize(37, ItemStack.EMPTY);
             for (int i = 0; i < itemNbt.size(); i++) {
-                itemList.set(i, ItemStack.fromNbt(itemNbt.getCompound(i)));
+                itemList.set(i, fromNbt(itemNbt.getCompound(i)));
             }
 
             return new InventoryProperty(itemList, armorList);
         }
+    }
+
+    private static ItemStack fromNbt(NbtElement nbt) {
+        return ItemStack.CODEC.parse(NbtOps.INSTANCE, nbt).result().orElse(ItemStack.EMPTY);
     }
 }
