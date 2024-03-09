@@ -14,6 +14,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.PlayerManager;
@@ -41,8 +42,10 @@ public class DeathLogServer implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
-        storage = new ServerDeathLogStorage();
-        DeathLogCommon.setStorage(storage);
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            storage = new ServerDeathLogStorage(server.getRegistryManager());
+            DeathLogCommon.setStorage(storage);
+        });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(literal("deathlog").then(literal("list").requires(hasPermission("deathlog.list"))

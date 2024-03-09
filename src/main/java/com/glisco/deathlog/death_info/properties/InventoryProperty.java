@@ -109,7 +109,7 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public InventoryProperty readFromNbt(NbtCompound nbt) {
+        public InventoryProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
 
             final NbtList armorNbt = nbt.getList("Armor", NbtElement.COMPOUND_TYPE);
             final var armorList = DefaultedList.ofSize(4, ItemStack.EMPTY);

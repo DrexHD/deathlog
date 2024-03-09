@@ -3,6 +3,7 @@ package com.glisco.deathlog.death_info.properties;
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 
 public class LocationProperty implements DeathInfoProperty {
@@ -55,7 +56,7 @@ public class LocationProperty implements DeathInfoProperty {
         }
 
         @Override
-        public LocationProperty readFromNbt(NbtCompound nbt) {
+        public LocationProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
             String location = nbt.getString("Location");
             boolean multiplayer = nbt.getBoolean("Multiplayer");
             return new LocationProperty(location, multiplayer);

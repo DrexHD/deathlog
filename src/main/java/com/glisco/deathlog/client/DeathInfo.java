@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
@@ -33,10 +34,10 @@ public class DeathInfo {
         this.properties = new LinkedHashMap<>();
     }
 
-    public static DeathInfo readFromNbt(NbtList nbt) {
+    public static DeathInfo readFromNbt(NbtList nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         final DeathInfo deathInfo = new DeathInfo();
         nbt.forEach(element -> {
-            final var parsed = DeathInfoPropertySerializer.load((NbtCompound) element);
+            final var parsed = DeathInfoPropertySerializer.load((NbtCompound) element, wrapperLookup);
             deathInfo.setProperty(parsed.getRight(), parsed.getLeft());
         });
         return deathInfo;
@@ -48,8 +49,8 @@ public class DeathInfo {
         return nbt;
     }
 
-    public static DeathInfo read(PacketByteBuf buffer) {
-        return readFromNbt(buffer.readNbt().getList("DeathInfo", NbtElement.COMPOUND_TYPE));
+    public static DeathInfo read(PacketByteBuf buffer, RegistryWrapper.WrapperLookup wrapperLookup) {
+        return readFromNbt(buffer.readNbt().getList("DeathInfo", NbtElement.COMPOUND_TYPE), wrapperLookup);
     }
 
     public void write(PacketByteBuf buffer) {

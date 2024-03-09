@@ -3,6 +3,7 @@ package com.glisco.deathlog.death_info.properties;
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 
 public class StringProperty implements DeathInfoProperty {
@@ -53,7 +54,7 @@ public class StringProperty implements DeathInfoProperty {
         }
 
         @Override
-        public StringProperty readFromNbt(NbtCompound nbt) {
+        public StringProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
             String key = nbt.getString("TranslationKey");
             String data = nbt.getString("Data");
 

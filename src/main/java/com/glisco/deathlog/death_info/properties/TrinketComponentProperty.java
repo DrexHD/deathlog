@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
@@ -76,11 +77,11 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public TrinketComponentProperty readFromNbt(NbtCompound nbt) {
+        public TrinketComponentProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
             var componentNbt = nbt.getCompound("ComponentData");
 
             var trinketList = DefaultedList.ofSize(nbt.getList("Items", NbtElement.COMPOUND_TYPE).size(), ItemStack.EMPTY);
-            Inventories.readNbt(nbt, trinketList, DynamicRegistryManager.EMPTY);
+            Inventories.readNbt(nbt, trinketList, wrapperLookup);
 
             return new TrinketComponentProperty(componentNbt, trinketList);
         }

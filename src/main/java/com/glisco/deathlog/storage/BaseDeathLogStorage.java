@@ -6,6 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +25,7 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
     private boolean errored = false;
     private String errorCondition = "";
 
-    protected CompletableFuture<List<DeathInfo>> load(File file) {
+    protected CompletableFuture<List<DeathInfo>> load(File file, RegistryWrapper.WrapperLookup wrapperLookup) {
         final var future = new CompletableFuture<List<DeathInfo>>();
         Util.getIoWorkerExecutor().submit(() -> {
             if (errored) {
@@ -63,7 +64,7 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
             final var list = new ArrayList<DeathInfo>();
             final NbtList infoList = deathNbt.getList("Deaths", NbtElement.LIST_TYPE);
             for (int i = 0; i < infoList.size(); i++) {
-                list.add(DeathInfo.readFromNbt(infoList.getList(i)));
+                list.add(DeathInfo.readFromNbt(infoList.getList(i), wrapperLookup));
             }
 
             future.complete(list);

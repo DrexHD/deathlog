@@ -3,6 +3,7 @@ package com.glisco.deathlog.death_info.properties;
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 
 public class MissingDeathInfoProperty implements DeathInfoProperty {
@@ -47,7 +48,7 @@ public class MissingDeathInfoProperty implements DeathInfoProperty {
         }
 
         @Override
-        public MissingDeathInfoProperty readFromNbt(NbtCompound nbt) {
+        public MissingDeathInfoProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
             return new MissingDeathInfoProperty(this, nbt);
         }
     }

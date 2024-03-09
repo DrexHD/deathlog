@@ -1,6 +1,7 @@
 package com.glisco.deathlog.death_info;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -29,6 +30,6 @@ public abstract class DeathInfoPropertyType<P extends DeathInfoProperty> {
 
     public abstract boolean displayedInInfoView();
 
-    public abstract P readFromNbt(NbtCompound nbt);
+    public abstract P readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup);
 
 }

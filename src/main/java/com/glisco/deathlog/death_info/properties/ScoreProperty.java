@@ -3,6 +3,7 @@ package com.glisco.deathlog.death_info.properties;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
@@ -67,7 +68,7 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public ScoreProperty readFromNbt(NbtCompound nbt) {
+        public ScoreProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
 
             int score = nbt.getInt("Score");
             int levels = nbt.getInt("Levels");

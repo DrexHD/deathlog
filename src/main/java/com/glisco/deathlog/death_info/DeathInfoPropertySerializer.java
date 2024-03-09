@@ -2,6 +2,7 @@ package com.glisco.deathlog.death_info;
 
 import com.glisco.deathlog.death_info.properties.*;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Pair;
 
 import java.util.LinkedHashMap;
@@ -31,12 +32,12 @@ public class DeathInfoPropertySerializer {
         return nbt;
     }
 
-    public static Pair<DeathInfoProperty, String> load(NbtCompound propertyNbt) {
+    public static Pair<DeathInfoProperty, String> load(NbtCompound propertyNbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         String type = propertyNbt.getString("Type");
         String identifier = propertyNbt.getString("Identifier");
 
         final var typeInstance = TYPES.containsKey(type) ? TYPES.get(type) : new MissingDeathInfoProperty.Type(identifier);
-        return new Pair<>(typeInstance.readFromNbt(propertyNbt), identifier);
+        return new Pair<>(typeInstance.readFromNbt(propertyNbt, wrapperLookup), identifier);
     }
 
 }

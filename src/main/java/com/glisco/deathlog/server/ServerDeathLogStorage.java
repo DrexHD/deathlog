@@ -7,6 +7,7 @@ import com.glisco.deathlog.storage.BaseDeathLogStorage;
 import com.glisco.deathlog.storage.DeathInfoCreatedCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +22,7 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
     private final Map<UUID, List<DeathInfo>> deathInfos;
     private final Path deathLogDir;
 
-    public ServerDeathLogStorage() {
+    public ServerDeathLogStorage(RegistryWrapper.WrapperLookup wrapperLookup) {
         this.deathInfos = new HashMap<>();
         this.deathLogDir = FabricLoader.getInstance().getGameDir().resolve("deaths").toAbsolutePath();
 
@@ -51,7 +52,7 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
                     return;
                 }
 
-                deathInfos.put(uuid, load(path.toFile()).join());
+                deathInfos.put(uuid, load(path.toFile(), wrapperLookup).join());
             });
         } catch (IOException | IllegalArgumentException e) {
             raiseError("Unknown problem");
