@@ -24,11 +24,11 @@ public class DeathInfoPropertySerializer {
         TYPES.put(id, type);
     }
 
-    public static NbtCompound save(DeathInfoProperty property, String identifier) {
+    public static NbtCompound save(DeathInfoProperty property, String identifier, RegistryWrapper.WrapperLookup wrapperLookup) {
         NbtCompound nbt = new NbtCompound();
         nbt.putString("Type", property.getType().getId());
         nbt.putString("Identifier", identifier);
-        property.writeNbt(nbt);
+        property.writeNbt(nbt, wrapperLookup);
         return nbt;
     }
 

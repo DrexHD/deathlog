@@ -73,7 +73,7 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
         return future;
     }
 
-    protected void save(File file, List<DeathInfo> listIn) {
+    protected void save(File file, List<DeathInfo> listIn, RegistryWrapper.WrapperLookup wrapperLookup) {
         final var list = ImmutableList.copyOf(listIn);
         Util.getIoWorkerExecutor().submit(() -> {
             if (errored) {
@@ -84,7 +84,7 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
             final NbtCompound deathNbt = new NbtCompound();
             final NbtList infoList = new NbtList();
 
-            list.forEach(deathInfo -> infoList.add(deathInfo.writeNbt()));
+            list.forEach(deathInfo -> infoList.add(deathInfo.writeNbt(wrapperLookup)));
 
             deathNbt.put("Deaths", infoList);
             deathNbt.putInt("FormatRevision", FORMAT_REVISION);

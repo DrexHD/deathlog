@@ -15,7 +15,7 @@ public class ServerPlayerEntityMixin {
     @Inject(method = "onDeath", at = @At("HEAD"))
     public void onServerDeath(DamageSource source, CallbackInfo ci) {
         var player = (PlayerEntity) (Object) this;
-        DeathLogServer.getStorage().store(player.getDamageTracker().getDeathMessage(), player);
+        DeathLogServer.getStorage().store(player.getDamageTracker().getDeathMessage(), player, player.getRegistryManager());
     }
 
 }

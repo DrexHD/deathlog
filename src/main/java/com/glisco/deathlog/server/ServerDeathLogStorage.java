@@ -68,13 +68,13 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
     }
 
     @Override
-    public void delete(DeathInfo info, UUID profile) {
+    public void delete(DeathInfo info, UUID profile, RegistryWrapper.WrapperLookup wrapperLookup) {
         deathInfos.get(profile).remove(info);
-        save(deathLogDir.resolve(profile.toString() + ".dat").toFile(), deathInfos.get(profile));
+        save(deathLogDir.resolve(profile.toString() + ".dat").toFile(), deathInfos.get(profile), wrapperLookup);
     }
 
     @Override
-    public void store(Text deathMessage, PlayerEntity player) {
+    public void store(Text deathMessage, PlayerEntity player, RegistryWrapper.WrapperLookup wrapperLookup) {
         final DeathInfo deathInfo = new DeathInfo();
 
         deathInfo.setProperty(DeathInfo.INVENTORY_KEY, new InventoryProperty(player.getInventory()));
@@ -90,11 +90,11 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
         DeathInfoCreatedCallback.EVENT.invoker().event(deathInfo);
 
         deathInfos.computeIfAbsent(player.getUuid(), uuid -> new ArrayList<>()).add(deathInfo);
-        save(deathLogDir.resolve(player.getUuid().toString() + ".dat").toFile(), deathInfos.get(player.getUuid()));
+        save(deathLogDir.resolve(player.getUuid().toString() + ".dat").toFile(), deathInfos.get(player.getUuid()), wrapperLookup);
     }
 
     @Override
-    public void restore(int index, @Nullable UUID profile) {
+    public void restore(int index, @Nullable UUID profile, RegistryWrapper.WrapperLookup wrapperLookup) {
         //NO-OP
     }
 }

@@ -26,7 +26,7 @@ public class CoordinatesProperty implements DeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.putLong("Coordinates", coordinates.asLong());
     }
 

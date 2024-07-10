@@ -27,7 +27,7 @@ public class MissingDeathInfoProperty implements DeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.copyFrom(this.data);
     }
 

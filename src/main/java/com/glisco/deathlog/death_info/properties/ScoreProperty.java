@@ -36,7 +36,7 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.putInt("Score", score);
         nbt.putInt("Levels", levels);
         nbt.putFloat("Progress", progress);

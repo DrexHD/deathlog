@@ -36,9 +36,9 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.put("ComponentData", componentNbt);
-        Inventories.writeNbt(nbt, trinkets, DynamicRegistryManager.EMPTY);
+        Inventories.writeNbt(nbt, trinkets, wrapperLookup);
     }
 
     @Override

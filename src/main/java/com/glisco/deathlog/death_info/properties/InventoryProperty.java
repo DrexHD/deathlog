@@ -48,13 +48,13 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         final NbtList armorNbt = new NbtList();
-        playerArmor.forEach(stack -> armorNbt.add(stack.encodeAllowEmpty(DynamicRegistryManager.EMPTY)));
+        playerArmor.forEach(stack -> armorNbt.add(stack.encodeAllowEmpty(wrapperLookup)));
         nbt.put("Armor", armorNbt);
 
         final NbtList inventoryNbt = new NbtList();
-        playerItems.forEach(stack -> inventoryNbt.add(stack.encodeAllowEmpty(DynamicRegistryManager.EMPTY)));
+        playerItems.forEach(stack -> inventoryNbt.add(stack.encodeAllowEmpty(wrapperLookup)));
         nbt.put("Items", inventoryNbt);
     }
 
@@ -114,20 +114,20 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
             final NbtList armorNbt = nbt.getList("Armor", NbtElement.COMPOUND_TYPE);
             final var armorList = DefaultedList.ofSize(4, ItemStack.EMPTY);
             for (int i = 0; i < armorNbt.size(); i++) {
-                armorList.set(i, fromNbt(armorNbt.getCompound(i)));
+                armorList.set(i, fromNbt(armorNbt.getCompound(i), wrapperLookup));
             }
 
             final NbtList itemNbt = nbt.getList("Items", NbtElement.COMPOUND_TYPE);
             final var itemList = DefaultedList.ofSize(37, ItemStack.EMPTY);
             for (int i = 0; i < itemNbt.size(); i++) {
-                itemList.set(i, fromNbt(itemNbt.getCompound(i)));
+                itemList.set(i, fromNbt(itemNbt.getCompound(i), wrapperLookup));
             }
 
             return new InventoryProperty(itemList, armorList);
         }
     }
 
-    private static ItemStack fromNbt(NbtElement nbt) {
-        return ItemStack.CODEC.parse(NbtOps.INSTANCE, nbt).result().orElse(ItemStack.EMPTY);
+    private static ItemStack fromNbt(NbtElement nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
+        return ItemStack.CODEC.parse(wrapperLookup.getOps(NbtOps.INSTANCE), nbt).result().orElse(ItemStack.EMPTY);
     }
 }

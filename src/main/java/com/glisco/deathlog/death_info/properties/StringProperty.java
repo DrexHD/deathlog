@@ -27,7 +27,7 @@ public class StringProperty implements DeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.putString("TranslationKey", translationKey);
         nbt.putString("Data", data);
     }

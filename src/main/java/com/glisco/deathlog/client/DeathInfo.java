@@ -43,32 +43,10 @@ public class DeathInfo {
         return deathInfo;
     }
 
-    public NbtList writeNbt() {
+    public NbtList writeNbt(RegistryWrapper.WrapperLookup wrapperLookup) {
         final NbtList nbt = new NbtList();
-        properties.forEach((s, property) -> nbt.add(DeathInfoPropertySerializer.save(property, s)));
+        properties.forEach((s, property) -> nbt.add(DeathInfoPropertySerializer.save(property, s, wrapperLookup)));
         return nbt;
-    }
-
-    public static DeathInfo read(PacketByteBuf buffer, RegistryWrapper.WrapperLookup wrapperLookup) {
-        return readFromNbt(buffer.readNbt().getList("DeathInfo", NbtElement.COMPOUND_TYPE), wrapperLookup);
-    }
-
-    public void write(PacketByteBuf buffer) {
-        final var nbt = new NbtCompound();
-        nbt.put("DeathInfo", writeNbt());
-        buffer.writeNbt(nbt);
-    }
-
-    public void writePartial(PacketByteBuf buffer) {
-        final var list = new NbtList();
-        properties.forEach((s, property) -> {
-            if (property instanceof InventoryProperty || property instanceof TrinketComponentProperty) return;
-            list.add(DeathInfoPropertySerializer.save(property, s));
-        });
-
-        var nbt = new NbtCompound();
-        nbt.put("DeathInfo", list);
-        buffer.writeNbt(nbt);
     }
 
     public void restore(ServerPlayerEntity player) {

@@ -32,7 +32,7 @@ public class LocationProperty implements DeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.putString("Location", location);
         nbt.putBoolean("Multiplayer", multiplayer);
     }
