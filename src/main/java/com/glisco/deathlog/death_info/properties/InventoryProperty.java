@@ -50,11 +50,11 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
     @Override
     public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         final NbtList armorNbt = new NbtList();
-        playerArmor.forEach(stack -> armorNbt.add(stack.encodeAllowEmpty(wrapperLookup)));
+        playerArmor.forEach(stack -> armorNbt.add(stack.toNbt(wrapperLookup)));
         nbt.put("Armor", armorNbt);
 
         final NbtList inventoryNbt = new NbtList();
-        playerItems.forEach(stack -> inventoryNbt.add(stack.encodeAllowEmpty(wrapperLookup)));
+        playerItems.forEach(stack -> inventoryNbt.add(stack.toNbt(wrapperLookup)));
         nbt.put("Items", inventoryNbt);
     }
 

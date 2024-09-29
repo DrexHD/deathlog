@@ -27,7 +27,7 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
 
     protected CompletableFuture<List<DeathInfo>> load(File file, RegistryWrapper.WrapperLookup wrapperLookup) {
         final var future = new CompletableFuture<List<DeathInfo>>();
-        Util.getIoWorkerExecutor().submit(() -> {
+        Util.getIoWorkerExecutor().execute(() -> {
             if (errored) {
                 LOGGER.warn("Attempted to load DeathLog database even though disk operations are disabled");
                 future.complete(null);
@@ -75,7 +75,7 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
 
     protected void save(File file, List<DeathInfo> listIn, RegistryWrapper.WrapperLookup wrapperLookup) {
         final var list = ImmutableList.copyOf(listIn);
-        Util.getIoWorkerExecutor().submit(() -> {
+        Util.getIoWorkerExecutor().execute(() -> {
             if (errored) {
                 LOGGER.warn("Attempted to save DeathLog database even though disk operations are disabled");
                 return;
