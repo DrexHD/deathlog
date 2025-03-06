@@ -50,7 +50,7 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
 
     @Override
     public void restore(ServerPlayerEntity player) {
-        TrinketsApi.getTrinketComponent(player).get().readFromNbt(componentNbt);
+        TrinketsApi.getTrinketComponent(player).get().readFromNbt(componentNbt, player.getRegistryManager());
     }
 
     public static void apply(DeathInfo info, PlayerEntity player) {
@@ -58,7 +58,7 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
         var list = trinketComponent.getAllEquipped().stream().map(pair -> pair.getRight().copy()).toList();
 
         var nbt = new NbtCompound();
-        trinketComponent.writeToNbt(nbt);
+        trinketComponent.writeToNbt(nbt, player.getRegistryManager());
 
         info.setProperty("trinket_component", new TrinketComponentProperty(nbt, DefaultedList.copyOf(ItemStack.EMPTY, list.toArray(new ItemStack[0]))));
     }
