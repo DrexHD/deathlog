@@ -50,7 +50,7 @@ public class CoordinatesProperty implements DeathInfoProperty {
 
         @Override
         public CoordinatesProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            BlockPos location = BlockPos.fromLong(nbt.getLong("Coordinates"));
+            BlockPos location = BlockPos.fromLong(nbt.getLong("Coordinates", 0));
             return new CoordinatesProperty(location);
         }
     }

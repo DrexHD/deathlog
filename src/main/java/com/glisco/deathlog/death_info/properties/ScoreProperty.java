@@ -70,10 +70,10 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
         @Override
         public ScoreProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
 
-            int score = nbt.getInt("Score");
-            int levels = nbt.getInt("Levels");
-            float progress = nbt.getFloat("Progress");
-            int xp = nbt.getInt("XP");
+            int score = nbt.getInt("Score", 0);
+            int levels = nbt.getInt("Levels", 0);
+            float progress = nbt.getFloat("Progress", 0);
+            int xp = nbt.getInt("XP", 0);
 
             return new ScoreProperty(score, levels, progress, xp);
         }

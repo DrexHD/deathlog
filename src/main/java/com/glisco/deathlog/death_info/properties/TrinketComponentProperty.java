@@ -78,9 +78,9 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
 
         @Override
         public TrinketComponentProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            var componentNbt = nbt.getCompound("ComponentData");
+            var componentNbt = nbt.getCompoundOrEmpty("ComponentData");
 
-            var trinketList = DefaultedList.ofSize(nbt.getList("Items", NbtElement.COMPOUND_TYPE).size(), ItemStack.EMPTY);
+            var trinketList = DefaultedList.ofSize(nbt.getListOrEmpty("Items").size(), ItemStack.EMPTY);
             Inventories.readNbt(nbt, trinketList, wrapperLookup);
 
             return new TrinketComponentProperty(componentNbt, trinketList);

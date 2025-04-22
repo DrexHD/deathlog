@@ -33,8 +33,8 @@ public class DeathInfoPropertySerializer {
     }
 
     public static Pair<DeathInfoProperty, String> load(NbtCompound propertyNbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        String type = propertyNbt.getString("Type");
-        String identifier = propertyNbt.getString("Identifier");
+        String type = propertyNbt.getString("Type", "");
+        String identifier = propertyNbt.getString("Identifier", "");
 
         final var typeInstance = TYPES.containsKey(type) ? TYPES.get(type) : new MissingDeathInfoProperty.Type(identifier);
         return new Pair<>(typeInstance.readFromNbt(propertyNbt, wrapperLookup), identifier);

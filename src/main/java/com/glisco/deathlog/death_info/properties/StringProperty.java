@@ -55,8 +55,8 @@ public class StringProperty implements DeathInfoProperty {
 
         @Override
         public StringProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            String key = nbt.getString("TranslationKey");
-            String data = nbt.getString("Data");
+            String key = nbt.getString("TranslationKey", "");
+            String data = nbt.getString("Data", "");
 
             return new StringProperty(key, data);
         }

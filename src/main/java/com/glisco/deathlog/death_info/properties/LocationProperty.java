@@ -57,8 +57,8 @@ public class LocationProperty implements DeathInfoProperty {
 
         @Override
         public LocationProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            String location = nbt.getString("Location");
-            boolean multiplayer = nbt.getBoolean("Multiplayer");
+            String location = nbt.getString("Location", "");
+            boolean multiplayer = nbt.getBoolean("Multiplayer", false);
             return new LocationProperty(location, multiplayer);
         }
     }
