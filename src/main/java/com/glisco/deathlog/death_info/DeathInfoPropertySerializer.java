@@ -3,6 +3,8 @@ package com.glisco.deathlog.death_info;
 import com.glisco.deathlog.death_info.properties.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Pair;
 
 import java.util.LinkedHashMap;
@@ -24,20 +26,18 @@ public class DeathInfoPropertySerializer {
         TYPES.put(id, type);
     }
 
-    public static NbtCompound save(DeathInfoProperty property, String identifier, RegistryWrapper.WrapperLookup wrapperLookup) {
-        NbtCompound nbt = new NbtCompound();
-        nbt.putString("Type", property.getType().getId());
-        nbt.putString("Identifier", identifier);
-        property.writeNbt(nbt, wrapperLookup);
-        return nbt;
+    public static void save(DeathInfoProperty property, String identifier, WriteView view) {
+        view.putString("Type", property.getType().getId());
+        view.putString("Identifier", identifier);
+        property.writeNbt(view);
     }
 
-    public static Pair<DeathInfoProperty, String> load(NbtCompound propertyNbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        String type = propertyNbt.getString("Type", "");
-        String identifier = propertyNbt.getString("Identifier", "");
+    public static Pair<DeathInfoProperty, String> load(ReadView view) {
+        String type = view.getString("Type", "");
+        String identifier = view.getString("Identifier", "");
 
         final var typeInstance = TYPES.containsKey(type) ? TYPES.get(type) : new MissingDeathInfoProperty.Type(identifier);
-        return new Pair<>(typeInstance.readFromNbt(propertyNbt, wrapperLookup), identifier);
+        return new Pair<>(typeInstance.readFromNbt(view), identifier);
     }
 
 }

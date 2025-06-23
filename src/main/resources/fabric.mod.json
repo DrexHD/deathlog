@@ -19,9 +19,6 @@
     "main": [
       "com.glisco.deathlog.DeathLogCommon"
     ],
-    "client": [
-      "com.glisco.deathlog.client.DeathLogClient"
-    ],
     "server": [
       "com.glisco.deathlog.server.DeathLogServer"
     ]

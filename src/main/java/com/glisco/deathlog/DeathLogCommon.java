@@ -6,8 +6,12 @@ import com.glisco.deathlog.death_info.properties.TrinketComponentProperty;
 import com.glisco.deathlog.storage.DeathLogStorage;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeathLogCommon implements ModInitializer {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("deathlog");
 
     private static DeathLogStorage currentStorage = null;
     private static boolean usePermissions;

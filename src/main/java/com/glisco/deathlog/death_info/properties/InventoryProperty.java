@@ -5,12 +5,9 @@ import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -53,21 +50,11 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        final NbtList armorNbt = new NbtList();
-        playerArmor.forEach(stack -> armorNbt.add(toNbtAllowEmpty(wrapperLookup, stack)));
-        nbt.put("Armor", armorNbt);
-
-        final NbtList inventoryNbt = new NbtList();
-        playerItems.forEach(stack -> inventoryNbt.add(toNbtAllowEmpty(wrapperLookup, stack)));
-        nbt.put("Items", inventoryNbt);
-    }
-
-    private static NbtElement toNbtAllowEmpty(RegistryWrapper.WrapperLookup registries, ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
-            return new NbtCompound();
-        }
-        return itemStack.toNbt(registries);
+    public void writeNbt(WriteView view) {
+        WriteView.ListAppender<ItemStack> armor = view.getListAppender("Armor", ItemStack.OPTIONAL_CODEC);
+        playerArmor.forEach(armor::add);
+        WriteView.ListAppender<ItemStack> items = view.getListAppender("Items", ItemStack.OPTIONAL_CODEC);
+        playerItems.forEach(items::add);
     }
 
     @Override
@@ -127,25 +114,23 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public InventoryProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-
-            final NbtList armorNbt = nbt.getListOrEmpty("Armor");
+        public InventoryProperty readFromNbt(ReadView view) {
             final var armorList = DefaultedList.ofSize(4, ItemStack.EMPTY);
-            for (int i = 0; i < armorNbt.size(); i++) {
-                armorList.set(i, fromNbt(armorNbt.getCompoundOrEmpty(i), wrapperLookup));
+            int i = 0;
+            for (ItemStack armor : view.getTypedListView("Armor", ItemStack.OPTIONAL_CODEC)) {
+                armorList.set(i, armor);
+                i++;
             }
 
-            final NbtList itemNbt = nbt.getListOrEmpty("Items");
             final var itemList = DefaultedList.ofSize(37, ItemStack.EMPTY);
-            for (int i = 0; i < itemNbt.size(); i++) {
-                itemList.set(i, fromNbt(itemNbt.getCompoundOrEmpty(i), wrapperLookup));
+            i = 0;
+            for (ItemStack item : view.getTypedListView("Items", ItemStack.OPTIONAL_CODEC)) {
+                itemList.set(i, item);
+                i++;
             }
 
             return new InventoryProperty(itemList, armorList);
         }
     }
 
-    private static ItemStack fromNbt(NbtElement nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        return ItemStack.CODEC.parse(wrapperLookup.getOps(NbtOps.INSTANCE), nbt).result().orElse(ItemStack.EMPTY);
-    }
 }

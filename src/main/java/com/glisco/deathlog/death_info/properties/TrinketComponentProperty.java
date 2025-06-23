@@ -8,10 +8,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -36,9 +35,9 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbt.put("ComponentData", componentNbt);
-        Inventories.writeNbt(nbt, trinkets, wrapperLookup);
+    public void writeNbt(WriteView view) {
+        view.put("ComponentData", NbtCompound.CODEC, componentNbt);
+        Inventories.writeData(view, trinkets);
     }
 
     @Override
@@ -77,11 +76,12 @@ public class TrinketComponentProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public TrinketComponentProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            var componentNbt = nbt.getCompoundOrEmpty("ComponentData");
+        public TrinketComponentProperty readFromNbt(ReadView view) {
+            var componentNbt = view.read("ComponentData", NbtCompound.CODEC).orElse(new NbtCompound());
 
-            var trinketList = DefaultedList.ofSize(nbt.getListOrEmpty("Items").size(), ItemStack.EMPTY);
-            Inventories.readNbt(nbt, trinketList, wrapperLookup);
+
+            var trinketList = DefaultedList.ofSize(view.getOptionalListReadView("Items").map(readViews -> readViews.stream().toList().size()).orElse(0), ItemStack.EMPTY);
+            Inventories.readData(view, trinketList);
 
             return new TrinketComponentProperty(componentNbt, trinketList);
         }

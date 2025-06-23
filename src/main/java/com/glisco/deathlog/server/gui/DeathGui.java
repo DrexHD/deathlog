@@ -80,7 +80,7 @@ public class DeathGui extends SimpleGui {
         setSlot(51, new GuiElementBuilder(Items.EMERALD)
             .setName(Text.literal("Restore inventory"))
             .setCallback(() -> {
-                player.server.getCommandManager().executeWithPrefix(player.getCommandSource(), "/deathlog restore %s %d".formatted(profile.getName(), index));
+                player.getServer().getCommandManager().executeWithPrefix(player.getCommandSource(), "/deathlog restore %s %d".formatted(profile.getName(), index));
             })
         );
 
@@ -92,7 +92,7 @@ public class DeathGui extends SimpleGui {
                     .orElse("minecraft:overworld");
                 String pos = deathInfo.getProperty(DeathInfo.COORDINATES_KEY).map(DeathInfoProperty::toSearchableString)
                     .orElse("0 0 0");
-                player.server.getCommandManager().executeWithPrefix(player.getCommandSource(), "/execute in %s run tp @s %s".formatted(dim, pos));
+                player.getServer().getCommandManager().executeWithPrefix(player.getCommandSource(), "/execute in %s run tp @s %s".formatted(dim, pos));
             })
         );
 

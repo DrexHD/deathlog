@@ -1,12 +1,17 @@
 package com.glisco.deathlog.storage;
 
+import com.glisco.deathlog.DeathLogCommon;
 import com.glisco.deathlog.client.DeathInfo;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,11 +67,13 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
             }
 
             final var list = new ArrayList<DeathInfo>();
-            final NbtList infoList = deathNbt.getListOrEmpty("Deaths");
-            for (int i = 0; i < infoList.size(); i++) {
-                list.add(DeathInfo.readFromNbt(infoList.getListOrEmpty(i), wrapperLookup));
+            try (var reporter = new ErrorReporter.Logging(() -> "deathlog:DeathInfos", DeathLogCommon.LOGGER)) {
+                ReadView readView = NbtReadView.create(reporter, wrapperLookup, deathNbt);
+                ReadView.ListReadView deaths = readView.getListReadView("Deaths");
+                for (ReadView death : deaths) {
+                    list.add(DeathInfo.readFromNbt(death));
+                }
             }
-
             future.complete(list);
         });
 
@@ -76,24 +83,25 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
     protected void save(File file, List<DeathInfo> listIn, RegistryWrapper.WrapperLookup wrapperLookup) {
         final var list = ImmutableList.copyOf(listIn);
         Util.getIoWorkerExecutor().execute(() -> {
-            if (errored) {
-                LOGGER.warn("Attempted to save DeathLog database even though disk operations are disabled");
-                return;
-            }
+            try (var reporter = new ErrorReporter.Logging(() -> "deathlog:DeathInfos", DeathLogCommon.LOGGER)) {
+                NbtWriteView writeView = NbtWriteView.create(reporter, wrapperLookup);
 
-            final NbtCompound deathNbt = new NbtCompound();
-            final NbtList infoList = new NbtList();
+                if (errored) {
+                    LOGGER.warn("Attempted to save DeathLog database even though disk operations are disabled");
+                    return;
+                }
 
-            list.forEach(deathInfo -> infoList.add(deathInfo.writeNbt(wrapperLookup)));
+                WriteView.ListView deaths = writeView.getList("Deaths");
 
-            deathNbt.put("Deaths", infoList);
-            deathNbt.putInt("FormatRevision", FORMAT_REVISION);
+                list.forEach(deathInfo -> deathInfo.writeNbt(deaths.add()));
 
-            try {
-                NbtIo.write(deathNbt, file.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-                LOGGER.error("Failed to save DeathLog database");
+                writeView.putInt("FormatRevision", FORMAT_REVISION);
+
+                try {
+                    NbtIo.write(writeView.getNbt(), file.toPath());
+                } catch (IOException e) {
+                    LOGGER.error("Failed to save DeathLog database", e);
+                }
             }
         });
     }

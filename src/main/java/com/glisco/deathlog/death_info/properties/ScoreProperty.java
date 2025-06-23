@@ -2,9 +2,9 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 
 public class ScoreProperty implements RestorableDeathInfoProperty {
@@ -36,11 +36,11 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbt.putInt("Score", score);
-        nbt.putInt("Levels", levels);
-        nbt.putFloat("Progress", progress);
-        nbt.putInt("XP", xp);
+    public void writeNbt(WriteView view) {
+        view.putInt("Score", score);
+        view.putInt("Levels", levels);
+        view.putFloat("Progress", progress);
+        view.putInt("XP", xp);
     }
 
     @Override
@@ -68,12 +68,12 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public ScoreProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
+        public ScoreProperty readFromNbt(ReadView view) {
 
-            int score = nbt.getInt("Score", 0);
-            int levels = nbt.getInt("Levels", 0);
-            float progress = nbt.getFloat("Progress", 0);
-            int xp = nbt.getInt("XP", 0);
+            int score = view.getInt("Score", 0);
+            int levels = view.getInt("Levels", 0);
+            float progress = view.getFloat("Progress", 0);
+            int xp = view.getInt("XP", 0);
 
             return new ScoreProperty(score, levels, progress, xp);
         }

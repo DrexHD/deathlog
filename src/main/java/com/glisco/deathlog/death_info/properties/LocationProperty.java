@@ -4,6 +4,8 @@ import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 
 public class LocationProperty implements DeathInfoProperty {
@@ -32,9 +34,9 @@ public class LocationProperty implements DeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbt.putString("Location", location);
-        nbt.putBoolean("Multiplayer", multiplayer);
+    public void writeNbt(WriteView view) {
+        view.putString("Location", location);
+        view.putBoolean("Multiplayer", multiplayer);
     }
 
     @Override
@@ -56,9 +58,9 @@ public class LocationProperty implements DeathInfoProperty {
         }
 
         @Override
-        public LocationProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            String location = nbt.getString("Location", "");
-            boolean multiplayer = nbt.getBoolean("Multiplayer", false);
+        public LocationProperty readFromNbt(ReadView view) {
+            String location = view.getString("Location", "");
+            boolean multiplayer = view.getBoolean("Multiplayer", false);
             return new LocationProperty(location, multiplayer);
         }
     }

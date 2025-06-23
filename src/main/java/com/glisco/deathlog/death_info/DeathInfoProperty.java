@@ -1,7 +1,6 @@
 package com.glisco.deathlog.death_info;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 
 public interface DeathInfoProperty {
@@ -14,7 +13,7 @@ public interface DeathInfoProperty {
 
     Text formatted();
 
-    void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup);
+    void writeNbt(WriteView view);
 
     String toSearchableString();
 }

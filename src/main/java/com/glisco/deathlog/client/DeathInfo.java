@@ -4,14 +4,11 @@ import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertySerializer;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
 import com.glisco.deathlog.death_info.properties.InventoryProperty;
-import com.glisco.deathlog.death_info.properties.TrinketComponentProperty;
+import com.glisco.deathlog.util.CodecUtil;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -34,19 +31,19 @@ public class DeathInfo {
         this.properties = new LinkedHashMap<>();
     }
 
-    public static DeathInfo readFromNbt(NbtList nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public static DeathInfo readFromNbt(ReadView view) {
         final DeathInfo deathInfo = new DeathInfo();
-        nbt.forEach(element -> {
-            final var parsed = DeathInfoPropertySerializer.load((NbtCompound) element, wrapperLookup);
+
+        List<String> keys = view.read(CodecUtil.KEY_CODEC).orElse(Collections.emptyList());
+        keys.forEach(key -> {
+            final var parsed = DeathInfoPropertySerializer.load(view.getReadView(key));
             deathInfo.setProperty(parsed.getRight(), parsed.getLeft());
         });
         return deathInfo;
     }
 
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup wrapperLookup) {
-        final NbtList nbt = new NbtList();
-        properties.forEach((s, property) -> nbt.add(DeathInfoPropertySerializer.save(property, s, wrapperLookup)));
-        return nbt;
+    public void writeNbt(WriteView view) {
+        properties.forEach((key, property) -> DeathInfoPropertySerializer.save(property, key, view.get(key)));
     }
 
     public void restore(ServerPlayerEntity player) {

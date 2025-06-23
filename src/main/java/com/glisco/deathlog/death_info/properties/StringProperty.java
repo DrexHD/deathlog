@@ -4,6 +4,10 @@ import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 
 public class StringProperty implements DeathInfoProperty {
@@ -27,9 +31,9 @@ public class StringProperty implements DeathInfoProperty {
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbt.putString("TranslationKey", translationKey);
-        nbt.putString("Data", data);
+    public void writeNbt(WriteView view) {
+        view.putString("TranslationKey", translationKey);
+        view.putString("Data", data);
     }
 
     @Override
@@ -54,9 +58,9 @@ public class StringProperty implements DeathInfoProperty {
         }
 
         @Override
-        public StringProperty readFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
-            String key = nbt.getString("TranslationKey", "");
-            String data = nbt.getString("Data", "");
+        public StringProperty readFromNbt(ReadView view) {
+            String key = view.getString("TranslationKey", "");
+            String data = view.getString("Data", "");
 
             return new StringProperty(key, data);
         }
