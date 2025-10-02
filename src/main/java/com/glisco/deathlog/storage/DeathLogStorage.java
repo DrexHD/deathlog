@@ -19,7 +19,4 @@ public interface DeathLogStorage {
 
     void restore(int index, @Nullable UUID profile, RegistryWrapper.WrapperLookup wrapperLookup);
 
-    boolean isErrored();
-
-    String getErrorCondition();
 }

@@ -30,7 +30,7 @@ dependencies {
 //    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-
+    modImplementation include("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
     modImplementation include("eu.pb4:sgui:${project.sgui_version}")
 //    modImplementation annotationProcessor ("io.wispforest:owo-lib:${project.owo_version}")
 //    include "io.wispforest:owo-sentinel:${project.owo_version}"

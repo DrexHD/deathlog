@@ -27,7 +27,6 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
         this.deathLogDir = FabricLoader.getInstance().getGameDir().resolve("deaths").toAbsolutePath();
 
         if (!Files.exists(deathLogDir) && !deathLogDir.toFile().mkdir()) {
-            raiseError("Failed to create directory");
 
             LOGGER.error("Failed to create DeathLog storage directory, further disk operations have been disabled");
             return;
@@ -35,30 +34,21 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
 
         try {
             Files.list(deathLogDir).forEach(path -> {
-                if (isErrored()) return;
 
                 if (!Files.exists(path)) return;
                 if (path.endsWith(".dat")) return;
 
-                UUID uuid;
 
                 try {
-                    uuid = UUID.fromString(FilenameUtils.getBaseName(path.toString()));
+                    UUID uuid = UUID.fromString(FilenameUtils.getBaseName(path.toString()));
+                    deathInfos.put(uuid, load(path.toFile(), wrapperLookup).join());
                 } catch (IllegalArgumentException e) {
-                    raiseError("Invalid filename");
-
-                    e.printStackTrace();
-                    LOGGER.error("Failed to parse UUID from filename '{}', further disk operations have been disabled", FilenameUtils.removeExtension(path.toString()));
-                    return;
+                    LOGGER.error("Failed to parse UUID from filename '{}'", FilenameUtils.removeExtension(path.toString()), e);
                 }
 
-                deathInfos.put(uuid, load(path.toFile(), wrapperLookup).join());
             });
         } catch (IOException | IllegalArgumentException e) {
-            raiseError("Unknown problem");
-
-            e.printStackTrace();
-            LOGGER.error("Failed to load DeathLog database, further disk operations have been disabled");
+            LOGGER.error("Failed to load DeathLog database, further disk operations have been disabled", e);
         }
     }
 

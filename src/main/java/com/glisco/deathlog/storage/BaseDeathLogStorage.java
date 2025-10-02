@@ -5,7 +5,6 @@ import com.glisco.deathlog.client.DeathInfo;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.NbtReadView;
 import net.minecraft.storage.NbtWriteView;
@@ -27,17 +26,9 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
     private static final int FORMAT_REVISION = 2;
     public static final Logger LOGGER = LogManager.getLogger();
 
-    private boolean errored = false;
-    private String errorCondition = "";
-
     protected CompletableFuture<List<DeathInfo>> load(File file, RegistryWrapper.WrapperLookup wrapperLookup) {
         final var future = new CompletableFuture<List<DeathInfo>>();
         Util.getIoWorkerExecutor().execute(() -> {
-            if (errored) {
-                LOGGER.warn("Attempted to load DeathLog database even though disk operations are disabled");
-                future.complete(null);
-                return;
-            }
 
             NbtCompound deathNbt;
 
@@ -46,7 +37,6 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
                     deathNbt = NbtIo.read(file.toPath());
 
                     if (deathNbt.getInt("FormatRevision", 0) != FORMAT_REVISION) {
-                        raiseError("Incompatible format");
 
                         LOGGER.error("Incompatible DeathLog database format detected. Database not loaded and further disk operations disabled");
 
@@ -54,8 +44,6 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
                         return;
                     }
                 } catch (IOException e) {
-                    raiseError("Disk access failed");
-
                     e.printStackTrace();
                     LOGGER.error("Failed to load DeathLog database, further disk operations have been disabled");
 
@@ -86,11 +74,6 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
             try (var reporter = new ErrorReporter.Logging(() -> "deathlog:DeathInfos", DeathLogCommon.LOGGER)) {
                 NbtWriteView writeView = NbtWriteView.create(reporter, wrapperLookup);
 
-                if (errored) {
-                    LOGGER.warn("Attempted to save DeathLog database even though disk operations are disabled");
-                    return;
-                }
-
                 WriteView.ListView deaths = writeView.getList("Deaths");
 
                 list.forEach(deathInfo -> deathInfo.writeNbt(deaths.add()));
@@ -104,21 +87,6 @@ public abstract class BaseDeathLogStorage implements DeathLogStorage {
                 }
             }
         });
-    }
-
-    @Override
-    public boolean isErrored() {
-        return errored;
-    }
-
-    @Override
-    public String getErrorCondition() {
-        return errorCondition;
-    }
-
-    protected void raiseError(String error) {
-        this.errored = true;
-        this.errorCondition = error;
     }
 
 }
