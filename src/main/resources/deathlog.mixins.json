@@ -4,8 +4,6 @@
   "package": "com.glisco.deathlog.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "MinecraftServerAccessor",
-    "SystemToastAccessor"
   ],
   "server": [
     "ServerPlayerEntityMixin"

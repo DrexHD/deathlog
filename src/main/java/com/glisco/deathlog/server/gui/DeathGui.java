@@ -3,12 +3,12 @@ package com.glisco.deathlog.server.gui;
 import com.glisco.deathlog.client.DeathInfo;
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.server.ServerDeathLogStorage;
-import com.mojang.authlib.GameProfile;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
@@ -19,10 +19,10 @@ public class DeathGui extends SimpleGui {
 
     private DeathInfo deathInfo;
     private final ServerDeathLogStorage storage;
-    private final GameProfile profile;
+    private final PlayerConfigEntry profile;
     private int index;
 
-    public DeathGui(ServerPlayerEntity player, ServerDeathLogStorage storage, GameProfile profile, int index) {
+    public DeathGui(ServerPlayerEntity player, ServerDeathLogStorage storage, PlayerConfigEntry profile, int index) {
         super(ScreenHandlerType.GENERIC_9X6, player, false);
         this.storage = storage;
         this.profile = profile;
@@ -31,7 +31,7 @@ public class DeathGui extends SimpleGui {
     }
 
     private void initializeSlots() {
-        List<DeathInfo> deathInfos = storage.getDeathInfoList(profile.getId());
+        List<DeathInfo> deathInfos = storage.getDeathInfoList(profile.id());
         deathInfo = deathInfos.get(index);
 
         setTitle(deathInfo.getTitle());
@@ -80,7 +80,7 @@ public class DeathGui extends SimpleGui {
         setSlot(51, new GuiElementBuilder(Items.EMERALD)
             .setName(Text.literal("Restore inventory"))
             .setCallback(() -> {
-                player.getServer().getCommandManager().executeWithPrefix(player.getCommandSource(), "/deathlog restore %s %d".formatted(profile.getName(), index));
+                player.getEntityWorld().getServer().getCommandManager().executeWithPrefix(player.getCommandSource(), "/deathlog restore %s %d".formatted(profile.name(), index));
             })
         );
 
@@ -92,7 +92,7 @@ public class DeathGui extends SimpleGui {
                     .orElse("minecraft:overworld");
                 String pos = deathInfo.getProperty(DeathInfo.COORDINATES_KEY).map(DeathInfoProperty::toSearchableString)
                     .orElse("0 0 0");
-                player.getServer().getCommandManager().executeWithPrefix(player.getCommandSource(), "/execute in %s run tp @s %s".formatted(dim, pos));
+                player.getEntityWorld().getServer().getCommandManager().executeWithPrefix(player.getCommandSource(), "/execute in %s run tp @s %s".formatted(dim, pos));
             })
         );
 
