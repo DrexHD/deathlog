@@ -17,6 +17,9 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.command.permission.LeveledPermissionPredicate;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.PlayerManager;
@@ -110,11 +113,12 @@ public class DeathLogServer implements DedicatedServerModInitializer {
     }
 
     private static Predicate<ServerCommandSource> hasPermission(String node) {
-        return DeathLogCommon.usePermissions() ? Permissions.require(node, 4) : serverCommandSource -> serverCommandSource.hasPermissionLevel(4);
+        return DeathLogCommon.usePermissions() ? Permissions.require(node, 4) : serverCommandSource -> serverCommandSource.getPermissions().hasPermission(new Permission.Level(PermissionLevel.OWNERS));
     }
 
     public static boolean hasPermission(ServerPlayerEntity player, String node) {
-        return DeathLogCommon.usePermissions() ? Permissions.check(player, node, 4) : player.hasPermissionLevel(4);
+
+        return DeathLogCommon.usePermissions() ? Permissions.check(player, node, 4) : player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.OWNERS));
     }
 
     private static int executeRestoreLatest(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
