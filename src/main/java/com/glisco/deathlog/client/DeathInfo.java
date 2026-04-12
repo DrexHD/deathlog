@@ -5,12 +5,12 @@ import com.glisco.deathlog.death_info.DeathInfoPropertySerializer;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
 import com.glisco.deathlog.death_info.properties.InventoryProperty;
 import com.glisco.deathlog.util.CodecUtil;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.NonNullList;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -31,22 +31,22 @@ public class DeathInfo {
         this.properties = new LinkedHashMap<>();
     }
 
-    public static DeathInfo readFromNbt(ReadView view) {
+    public static DeathInfo readFromNbt(ValueInput view) {
         final DeathInfo deathInfo = new DeathInfo();
 
         List<String> keys = view.read(CodecUtil.KEY_CODEC).orElse(Collections.emptyList());
         keys.forEach(key -> {
-            final var parsed = DeathInfoPropertySerializer.load(view.getReadView(key));
-            deathInfo.setProperty(parsed.getRight(), parsed.getLeft());
+            final var parsed = DeathInfoPropertySerializer.load(view.childOrEmpty(key));
+            deathInfo.setProperty(parsed.getB(), parsed.getA());
         });
         return deathInfo;
     }
 
-    public void writeNbt(WriteView view) {
-        properties.forEach((key, property) -> DeathInfoPropertySerializer.save(property, key, view.get(key)));
+    public void writeNbt(ValueOutput view) {
+        properties.forEach((key, property) -> DeathInfoPropertySerializer.save(property, key, view.child(key)));
     }
 
-    public void restore(ServerPlayerEntity player) {
+    public void restore(ServerPlayer player) {
         properties.values().stream().filter(property -> property instanceof RestorableDeathInfoProperty).forEach(property -> ((RestorableDeathInfoProperty) property).restore(player));
     }
 
@@ -62,24 +62,24 @@ public class DeathInfo {
         return getProperty(INVENTORY_KEY).isEmpty();
     }
 
-    public Text getListName() {
+    public Component getListName() {
         DeathInfoProperty property = getProperty(TIME_OF_DEATH_KEY).orElse(null);
-        return property == null ? Text.translatable("text.deathlog.info.time_missing") : property.formatted();
+        return property == null ? Component.translatable("text.deathlog.info.time_missing") : property.formatted();
     }
 
-    public Text getTitle() {
+    public Component getTitle() {
         DeathInfoProperty property = getProperty(DEATH_MESSAGE_KEY).orElse(null);
-        return property == null ? Text.translatable("text.deathlog.info.death_message_missing") : property.formatted();
+        return property == null ? Component.translatable("text.deathlog.info.death_message_missing") : property.formatted();
     }
 
-    public List<Text> getLeftColumnText() {
-        final var texts = new ArrayList<Text>();
+    public List<Component> getLeftColumnText() {
+        final var texts = new ArrayList<Component>();
         iterateDisplayProperties(property -> texts.add(property.getName()));
         return texts;
     }
 
-    public List<Text> getRightColumnText() {
-        final var texts = new ArrayList<Text>();
+    public List<Component> getRightColumnText() {
+        final var texts = new ArrayList<Component>();
         iterateDisplayProperties(property -> texts.add(property.formatted()));
         return texts;
     }
@@ -98,15 +98,15 @@ public class DeathInfo {
         });
     }
 
-    public DefaultedList<ItemStack> getPlayerArmor() {
+    public NonNullList<ItemStack> getPlayerArmor() {
         var propertyOptional = getProperty(INVENTORY_KEY);
-        if (propertyOptional.isEmpty()) return DefaultedList.of();
+        if (propertyOptional.isEmpty()) return NonNullList.create();
         return ((InventoryProperty) propertyOptional.get()).getPlayerArmor();
     }
 
-    public DefaultedList<ItemStack> getPlayerItems() {
+    public NonNullList<ItemStack> getPlayerItems() {
         var propertyOptional = getProperty(INVENTORY_KEY);
-        if (propertyOptional.isEmpty()) return DefaultedList.of();
+        if (propertyOptional.isEmpty()) return NonNullList.create();
         return ((InventoryProperty) propertyOptional.get()).getPlayerItems();
     }
 }

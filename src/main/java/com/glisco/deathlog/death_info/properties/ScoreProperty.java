@@ -2,10 +2,10 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
 
 public class ScoreProperty implements RestorableDeathInfoProperty {
 
@@ -28,15 +28,15 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public Text formatted() {
-        return Text.translatable(
+    public Component formatted() {
+        return Component.translatable(
                 "deathlog.deathinfoproperty.score.value",
                 score, levels, xp
         );
     }
 
     @Override
-    public void writeNbt(WriteView view) {
+    public void writeNbt(ValueOutput view) {
         view.putInt("Score", score);
         view.putInt("Levels", levels);
         view.putFloat("Progress", progress);
@@ -49,9 +49,9 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public void restore(ServerPlayerEntity player) {
+    public void restore(ServerPlayer player) {
         player.experienceProgress = progress;
-        player.setExperienceLevel(levels);
+        player.setExperienceLevels(levels);
     }
 
     public static class Type extends DeathInfoPropertyType<ScoreProperty> {
@@ -68,12 +68,12 @@ public class ScoreProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public ScoreProperty readFromNbt(ReadView view) {
+        public ScoreProperty readFromNbt(ValueInput view) {
 
-            int score = view.getInt("Score", 0);
-            int levels = view.getInt("Levels", 0);
-            float progress = view.getFloat("Progress", 0);
-            int xp = view.getInt("XP", 0);
+            int score = view.getIntOr("Score", 0);
+            int levels = view.getIntOr("Levels", 0);
+            float progress = view.getFloatOr("Progress", 0);
+            int xp = view.getIntOr("XP", 0);
 
             return new ScoreProperty(score, levels, progress, xp);
         }

@@ -2,17 +2,16 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
 
 public class MissingDeathInfoProperty implements DeathInfoProperty {
 
     private final Type type;
-    private final ReadView view;
+    private final ValueInput view;
 
-    public MissingDeathInfoProperty(Type type, ReadView view) {
+    public MissingDeathInfoProperty(Type type, ValueInput view) {
         this.type = type;
         this.view = view;
     }
@@ -23,12 +22,12 @@ public class MissingDeathInfoProperty implements DeathInfoProperty {
     }
 
     @Override
-    public Text formatted() {
-        return Text.empty();
+    public Component formatted() {
+        return Component.empty();
     }
 
     @Override
-    public void writeNbt(WriteView view) {
+    public void writeNbt(ValueOutput view) {
         // TODO
 //        view.put(NbtCompound.CODEC, this.view.read(NbtCompound.CODEC));
     }
@@ -50,7 +49,7 @@ public class MissingDeathInfoProperty implements DeathInfoProperty {
         }
 
         @Override
-        public MissingDeathInfoProperty readFromNbt(ReadView view) {
+        public MissingDeathInfoProperty readFromNbt(ValueInput view) {
             return new MissingDeathInfoProperty(this, view);
         }
     }

@@ -2,13 +2,9 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
 
 public class StringProperty implements DeathInfoProperty {
 
@@ -26,12 +22,12 @@ public class StringProperty implements DeathInfoProperty {
     }
 
     @Override
-    public Text formatted() {
-        return Text.literal(data);
+    public Component formatted() {
+        return Component.literal(data);
     }
 
     @Override
-    public void writeNbt(WriteView view) {
+    public void writeNbt(ValueOutput view) {
         view.putString("TranslationKey", translationKey);
         view.putString("Data", data);
     }
@@ -42,8 +38,8 @@ public class StringProperty implements DeathInfoProperty {
     }
 
     @Override
-    public Text getName() {
-        return DeathInfoPropertyType.decorateName(Text.translatable(translationKey));
+    public Component getName() {
+        return DeathInfoPropertyType.decorateName(Component.translatable(translationKey));
     }
 
     public static class Type extends DeathInfoPropertyType<StringProperty> {
@@ -58,9 +54,9 @@ public class StringProperty implements DeathInfoProperty {
         }
 
         @Override
-        public StringProperty readFromNbt(ReadView view) {
-            String key = view.getString("TranslationKey", "");
-            String data = view.getString("Data", "");
+        public StringProperty readFromNbt(ValueInput view) {
+            String key = view.getStringOr("TranslationKey", "");
+            String data = view.getStringOr("Data", "");
 
             return new StringProperty(key, data);
         }

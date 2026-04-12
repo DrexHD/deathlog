@@ -2,12 +2,10 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
 
 public class CoordinatesProperty implements DeathInfoProperty {
 
@@ -23,12 +21,12 @@ public class CoordinatesProperty implements DeathInfoProperty {
     }
 
     @Override
-    public Text formatted() {
-        return Text.literal("%d %d %d".formatted(coordinates.getX(), coordinates.getY(), coordinates.getZ()));
+    public Component formatted() {
+        return Component.literal("%d %d %d".formatted(coordinates.getX(), coordinates.getY(), coordinates.getZ()));
     }
 
     @Override
-    public void writeNbt(WriteView view) {
+    public void writeNbt(ValueOutput view) {
         view.putLong("Coordinates", coordinates.asLong());
     }
 
@@ -51,8 +49,8 @@ public class CoordinatesProperty implements DeathInfoProperty {
         }
 
         @Override
-        public CoordinatesProperty readFromNbt(ReadView view) {
-            BlockPos location = BlockPos.fromLong(view.getLong("Coordinates", 0));
+        public CoordinatesProperty readFromNbt(ValueInput view) {
+            BlockPos location = BlockPos.of(view.getLongOr("Coordinates", 0));
             return new CoordinatesProperty(location);
         }
     }
