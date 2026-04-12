@@ -47,7 +47,7 @@ public class DeathGui extends SimpleGui {
 
         boolean hasPreviousPage = index > 0;
         setSlot(48, new GuiElementBuilder(Items.PLAYER_HEAD)
-            .setSkullOwner(hasPreviousPage ? GuiTextures.GUI_PREVIOUS_PAGE : GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED)
+            .setProfileSkinTexture(hasPreviousPage ? GuiTextures.GUI_PREVIOUS_PAGE : GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED)
             .setName(Component.literal("Previous page"))
             .setCallback(() -> {
                 if (hasPreviousPage) {
@@ -62,7 +62,7 @@ public class DeathGui extends SimpleGui {
 
         boolean hasNextPage = index < deathInfos.size() - 1;
         setSlot(50, new GuiElementBuilder(Items.PLAYER_HEAD)
-            .setSkullOwner(hasNextPage ? GuiTextures.GUI_NEXT_PAGE : GuiTextures.GUI_NEXT_PAGE_BLOCKED)
+            .setProfileSkinTexture(hasNextPage ? GuiTextures.GUI_NEXT_PAGE : GuiTextures.GUI_NEXT_PAGE_BLOCKED)
             .setName(Component.literal("Next page"))
             .setCallback(() -> {
                 if (hasNextPage) {
