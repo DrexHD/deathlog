@@ -2,41 +2,41 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
 import com.glisco.deathlog.death_info.RestorableDeathInfoProperty;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.NonNullList;
 
 public class InventoryProperty implements RestorableDeathInfoProperty {
 
-    private final DefaultedList<ItemStack> playerItems;
-    private final DefaultedList<ItemStack> playerArmor;
+    private final NonNullList<ItemStack> playerItems;
+    private final NonNullList<ItemStack> playerArmor;
 
-    public InventoryProperty(DefaultedList<ItemStack> playerItems, DefaultedList<ItemStack> playerArmor) {
+    public InventoryProperty(NonNullList<ItemStack> playerItems, NonNullList<ItemStack> playerArmor) {
         this.playerItems = playerItems;
         this.playerArmor = playerArmor;
     }
 
-    public InventoryProperty(PlayerInventory playerInventory) {
-        this.playerItems = DefaultedList.ofSize(37, ItemStack.EMPTY);
-        this.playerArmor = DefaultedList.ofSize(4, ItemStack.EMPTY);
+    public InventoryProperty(Inventory playerInventory) {
+        this.playerItems = NonNullList.withSize(37, ItemStack.EMPTY);
+        this.playerArmor = NonNullList.withSize(4, ItemStack.EMPTY);
 
         var player = playerInventory.player;
 
         for (EquipmentSlot value : EquipmentSlot.values()) {
             if (value.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-                var stack = player.getEquippedStack(value);
-                playerArmor.set(value.getEntitySlotId(), stack.copy());
+                var stack = player.getItemBySlot(value);
+                playerArmor.set(value.getIndex(), stack.copy());
             }
         }
 
-        copy(playerInventory.getMainStacks(), playerItems);
+        copy(playerInventory.getNonEquipmentItems(), playerItems);
 
-        playerItems.set(PlayerInventory.MAIN_SIZE, player.getOffHandStack().copy());
+        playerItems.set(Inventory.INVENTORY_SIZE, player.getOffhandItem().copy());
     }
 
     @Override
@@ -45,15 +45,15 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
     }
 
     @Override
-    public Text formatted() {
+    public Component formatted() {
         return null;
     }
 
     @Override
-    public void writeNbt(WriteView view) {
-        WriteView.ListAppender<ItemStack> armor = view.getListAppender("Armor", ItemStack.OPTIONAL_CODEC);
+    public void writeNbt(ValueOutput view) {
+        ValueOutput.TypedOutputList<ItemStack> armor = view.list("Armor", ItemStack.OPTIONAL_CODEC);
         playerArmor.forEach(armor::add);
-        WriteView.ListAppender<ItemStack> items = view.getListAppender("Items", ItemStack.OPTIONAL_CODEC);
+        ValueOutput.TypedOutputList<ItemStack> items = view.list("Items", ItemStack.OPTIONAL_CODEC);
         playerItems.forEach(items::add);
     }
 
@@ -61,42 +61,42 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
     public String toSearchableString() {
         StringBuilder builder = new StringBuilder();
 
-        playerItems.forEach(stack -> builder.append(stack.getName().getString()));
-        playerArmor.forEach(stack -> builder.append(stack.getName().getString()));
+        playerItems.forEach(stack -> builder.append(stack.getHoverName().getString()));
+        playerArmor.forEach(stack -> builder.append(stack.getHoverName().getString()));
 
         return builder.toString();
     }
 
     @Override
-    public void restore(ServerPlayerEntity player) {
+    public void restore(ServerPlayer player) {
         final var inventory = player.getInventory();
-        inventory.clear();
+        inventory.clearContent();
 
 
         for (EquipmentSlot value : EquipmentSlot.values()) {
             if (value.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-                player.equipStack(value, playerArmor.get(value.getEntitySlotId()));
+                player.setItemSlot(value, playerArmor.get(value.getIndex()));
             }
         }
 
-        copy(playerItems, inventory.getMainStacks(), PlayerInventory.MAIN_SIZE);
+        copy(playerItems, inventory.getNonEquipmentItems(), Inventory.INVENTORY_SIZE);
 
-        player.equipStack(EquipmentSlot.OFFHAND, playerItems.get(PlayerInventory.MAIN_SIZE));
+        player.setItemSlot(EquipmentSlot.OFFHAND, playerItems.get(Inventory.INVENTORY_SIZE));
     }
 
-    public DefaultedList<ItemStack> getPlayerArmor() {
+    public NonNullList<ItemStack> getPlayerArmor() {
         return playerArmor;
     }
 
-    public DefaultedList<ItemStack> getPlayerItems() {
+    public NonNullList<ItemStack> getPlayerItems() {
         return playerItems;
     }
 
-    private static void copy(DefaultedList<ItemStack> list, DefaultedList<ItemStack> other) {
+    private static void copy(NonNullList<ItemStack> list, NonNullList<ItemStack> other) {
         copy(list, other, list.size());
     }
 
-    private static void copy(DefaultedList<ItemStack> list, DefaultedList<ItemStack> other, int maxItems) {
+    private static void copy(NonNullList<ItemStack> list, NonNullList<ItemStack> other, int maxItems) {
         for (int i = 0; i < maxItems; i++) other.set(i, list.get(i).copy());
     }
 
@@ -114,17 +114,17 @@ public class InventoryProperty implements RestorableDeathInfoProperty {
         }
 
         @Override
-        public InventoryProperty readFromNbt(ReadView view) {
-            final var armorList = DefaultedList.ofSize(4, ItemStack.EMPTY);
+        public InventoryProperty readFromNbt(ValueInput view) {
+            final var armorList = NonNullList.withSize(4, ItemStack.EMPTY);
             int i = 0;
-            for (ItemStack armor : view.getTypedListView("Armor", ItemStack.OPTIONAL_CODEC)) {
+            for (ItemStack armor : view.listOrEmpty("Armor", ItemStack.OPTIONAL_CODEC)) {
                 armorList.set(i, armor);
                 i++;
             }
 
-            final var itemList = DefaultedList.ofSize(37, ItemStack.EMPTY);
+            final var itemList = NonNullList.withSize(37, ItemStack.EMPTY);
             i = 0;
-            for (ItemStack item : view.getTypedListView("Items", ItemStack.OPTIONAL_CODEC)) {
+            for (ItemStack item : view.listOrEmpty("Items", ItemStack.OPTIONAL_CODEC)) {
                 itemList.set(i, item);
                 i++;
             }

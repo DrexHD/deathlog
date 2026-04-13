@@ -6,9 +6,9 @@ import com.glisco.deathlog.death_info.properties.*;
 import com.glisco.deathlog.storage.BaseDeathLogStorage;
 import com.glisco.deathlog.storage.DeathInfoCreatedCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
     private final Map<UUID, List<DeathInfo>> deathInfos;
     private final Path deathLogDir;
 
-    public ServerDeathLogStorage(RegistryWrapper.WrapperLookup wrapperLookup) {
+    public ServerDeathLogStorage(HolderLookup.Provider wrapperLookup) {
         this.deathInfos = new HashMap<>();
         this.deathLogDir = FabricLoader.getInstance().getGameDir().resolve("deaths").toAbsolutePath();
 
@@ -58,19 +58,19 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
     }
 
     @Override
-    public void delete(DeathInfo info, UUID profile, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public void delete(DeathInfo info, UUID profile, HolderLookup.Provider wrapperLookup) {
         deathInfos.get(profile).remove(info);
         save(deathLogDir.resolve(profile.toString() + ".dat").toFile(), deathInfos.get(profile), wrapperLookup);
     }
 
     @Override
-    public void store(Text deathMessage, PlayerEntity player, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public void store(Component deathMessage, Player player, HolderLookup.Provider wrapperLookup) {
         final DeathInfo deathInfo = new DeathInfo();
 
         deathInfo.setProperty(DeathInfo.INVENTORY_KEY, new InventoryProperty(player.getInventory()));
 
-        deathInfo.setProperty(DeathInfo.COORDINATES_KEY, new CoordinatesProperty(player.getBlockPos()));
-        deathInfo.setProperty(DeathInfo.DIMENSION_KEY, new StringProperty("deathlog.deathinfoproperty.dimension", player.getEntityWorld().getRegistryKey().getValue().toString()));
+        deathInfo.setProperty(DeathInfo.COORDINATES_KEY, new CoordinatesProperty(player.blockPosition()));
+        deathInfo.setProperty(DeathInfo.DIMENSION_KEY, new StringProperty("deathlog.deathinfoproperty.dimension", player.level().dimension().identifier().toString()));
         deathInfo.setProperty(DeathInfo.LOCATION_KEY, new LocationProperty("Server", true));
         deathInfo.setProperty(DeathInfo.SCORE_KEY, new ScoreProperty(player.getScore(), player.experienceLevel, player.experienceProgress, player.totalExperience));
         deathInfo.setProperty(DeathInfo.DEATH_MESSAGE_KEY, new StringProperty("deathlog.deathinfoproperty.death_message", deathMessage.getString()));
@@ -79,12 +79,12 @@ public class ServerDeathLogStorage extends BaseDeathLogStorage {
         SpecialPropertyProvider.apply(deathInfo, player);
         DeathInfoCreatedCallback.EVENT.invoker().event(deathInfo);
 
-        deathInfos.computeIfAbsent(player.getUuid(), uuid -> new ArrayList<>()).add(deathInfo);
-        save(deathLogDir.resolve(player.getUuid().toString() + ".dat").toFile(), deathInfos.get(player.getUuid()), wrapperLookup);
+        deathInfos.computeIfAbsent(player.getUUID(), uuid -> new ArrayList<>()).add(deathInfo);
+        save(deathLogDir.resolve(player.getUUID().toString() + ".dat").toFile(), deathInfos.get(player.getUUID()), wrapperLookup);
     }
 
     @Override
-    public void restore(int index, @Nullable UUID profile, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public void restore(int index, @Nullable UUID profile, HolderLookup.Provider wrapperLookup) {
         //NO-OP
     }
 }

@@ -2,11 +2,9 @@ package com.glisco.deathlog.death_info.properties;
 
 import com.glisco.deathlog.death_info.DeathInfoProperty;
 import com.glisco.deathlog.death_info.DeathInfoPropertyType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
 
 public class LocationProperty implements DeathInfoProperty {
 
@@ -24,17 +22,17 @@ public class LocationProperty implements DeathInfoProperty {
     }
 
     @Override
-    public Text formatted() {
-        return Text.translatable(
+    public Component formatted() {
+        return Component.translatable(
                 "deathlog.deathinfoproperty.location.value", location,
                 multiplayer
-                        ? Text.translatable("deathlog.deathinfoproperty.location.multiplayer")
-                        : Text.translatable("deathlog.deathinfoproperty.location.singleplayer")
+                        ? Component.translatable("deathlog.deathinfoproperty.location.multiplayer")
+                        : Component.translatable("deathlog.deathinfoproperty.location.singleplayer")
         );
     }
 
     @Override
-    public void writeNbt(WriteView view) {
+    public void writeNbt(ValueOutput view) {
         view.putString("Location", location);
         view.putBoolean("Multiplayer", multiplayer);
     }
@@ -58,9 +56,9 @@ public class LocationProperty implements DeathInfoProperty {
         }
 
         @Override
-        public LocationProperty readFromNbt(ReadView view) {
-            String location = view.getString("Location", "");
-            boolean multiplayer = view.getBoolean("Multiplayer", false);
+        public LocationProperty readFromNbt(ValueInput view) {
+            String location = view.getStringOr("Location", "");
+            boolean multiplayer = view.getBooleanOr("Multiplayer", false);
             return new LocationProperty(location, multiplayer);
         }
     }

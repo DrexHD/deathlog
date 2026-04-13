@@ -1,19 +1,19 @@
 package com.glisco.deathlog.death_info;
 
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.Component;
 
 public interface DeathInfoProperty {
 
-    default Text getName() {
+    default Component getName() {
         return DeathInfoPropertyType.decorateName(getType().getName());
     }
 
     DeathInfoPropertyType<?> getType();
 
-    Text formatted();
+    Component formatted();
 
-    void writeNbt(WriteView view);
+    void writeNbt(ValueOutput view);
 
     String toSearchableString();
 }
