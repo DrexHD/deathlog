@@ -37,7 +37,7 @@ public class DeathInfo {
         List<String> keys = view.read(CodecUtil.KEY_CODEC).orElse(Collections.emptyList());
         keys.forEach(key -> {
             final var parsed = DeathInfoPropertySerializer.load(view.childOrEmpty(key));
-            deathInfo.setProperty(parsed.getB(), parsed.getA());
+            deathInfo.setProperty(parsed.getSecond(), parsed.getFirst());
         });
         return deathInfo;
     }
