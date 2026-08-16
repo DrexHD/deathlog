@@ -3,7 +3,7 @@ package com.glisco.deathlog.death_info;
 import com.glisco.deathlog.death_info.properties.*;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.util.Tuple;
+import oshi.util.tuples.Pair;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,12 +30,12 @@ public class DeathInfoPropertySerializer {
         property.writeNbt(view);
     }
 
-    public static Tuple<DeathInfoProperty, String> load(ValueInput view) {
+    public static Pair<DeathInfoProperty, String> load(ValueInput view) {
         String type = view.getStringOr("Type", "");
         String identifier = view.getStringOr("Identifier", "");
 
         final var typeInstance = TYPES.containsKey(type) ? TYPES.get(type) : new MissingDeathInfoProperty.Type(identifier);
-        return new Tuple<>(typeInstance.readFromNbt(view), identifier);
+        return new Pair<>(typeInstance.readFromNbt(view), identifier);
     }
 
 }
